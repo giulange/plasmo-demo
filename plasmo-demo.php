@@ -31,6 +31,14 @@ echo "    <style>
            .ol-attribution a{
              color: black;
            }
+	   #selectors{
+            line-height:0px;
+            background-color:white;
+            height:236px;
+            width:350;
+            float:left;
+            padding:20px;
+	   }
            #sim {
             line-height:0px;
             background-color:white;
@@ -64,6 +72,7 @@ echo "
     <h1>Prototype Plasmo Wapp</h1>
 
     <div id=\"map\" class=\"map\"></div>
+    <div id=\"selectors\" class=\"selectors\">
      <form class=\"form-inline\">
        <label>Geometry type</label>
        <select id=\"type\">
@@ -75,7 +84,7 @@ echo "
        </select>
      </form>
      <form class=\"form-inline\">
-       <label>Background type</label>
+       <label>Background map</label>
        <select id=\"layer-select\">
          <option value=\"Aerial\">Aerial</option>
          <option value=\"AerialWithLabels\" selected>Aerial with labels</option>
@@ -84,7 +93,8 @@ echo "
          <option value=\"ordnanceSurvey\">Ordnance Survey</option>
        </select>
      </form>
-
+    </div>
+    <div class=\"span6\" id=\"mouse-position\">&nbsp;</div>
     <!-- the result of the php will be rendered inside these divs -->
     <div id=\"sim\" class=\"sim\"></div>
     <div id=\"plot\" class=\"plot\"></div>
@@ -137,20 +147,51 @@ echo "
 	  })
 	});
 
+	var mousePositionControl = new ol.control.MousePosition({
+	  coordinateFormat: ol.coordinate.createStringXY(4),
+	  projection: 'EPSG:4326',
+	  // comment the following two lines to have the mouse position
+	  // be placed within the map.
+	  className: 'custom-mouse-position',
+	  target: document.getElementById('mouse-position'),
+	  undefinedHTML: '&nbsp;'
+	});
+
         map = new ol.Map({
           target: 'map',
           layers: Lbing,
           loadTilesWhileInteracting: true,
           view: new ol.View({
             center: ol.proj.fromLonLat([14.5, 41.20]),
-            zoom: 10
+            zoom: 11
           }),
-	  controls: ol.control.defaults().extend([
-	    new ol.control.ScaleLine()
+	  controls: ol.control.defaults({
+	    attributionOptions: /** @type {olx.control.AttributionOptions} */ ({
+	      collapsible: true 
+	    })
+	  }).extend([
+	    new ol.control.ScaleLine(),
+	    mousePositionControl,
+	    new ol.control.ZoomToExtent({
+	      extent: ol.proj.fromLonLat([14.4386, 41.1540, 14.7258,  41.3020])
+/*	      [  813079.7791264898, 5929220.284081122,
+	        848966.9639063801, 5936863.986909639
+	      ]*/
+	    })
 	  ])
         });
 	map.addLayer(Lvec);
 
+	// Create the graticule component
+	var graticule = new ol.Graticule({
+	  // the style to use for the lines, optional.
+	  strokeStyle: new ol.style.Stroke({
+	    color: 'rgba(255,120,0,0.9)',
+	    width: 2,
+	    lineDash: [0.5, 4]
+	  })
+	});
+	graticule.setMap(map);
 
 	var typeSelect = document.getElementById('type');
 	var draw; // global so we can remove it later
