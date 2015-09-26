@@ -6,6 +6,9 @@
  *  - Map & Baselayer --> http://www.peterrobins.co.uk/it/olbase.html
  *  - Examples on input boxes (**) --> https://select2.github.io/examples.html
  *  - How to drow features on map (***) --> http://dev.openlayers.org/examples/draw-feature.html
+ *  - How to CLEARLY set divs within a web page (****) --> http://lau.csi.it/realizzare/accessibilita/fogli_di_stile/position/float-clear.htm
+ *  - How to CLEARLY divide a web page in different areas using divs (***) --> http://www.html.it/articoli/div-dal-layout-allattributo-id-1/
+ *									   --> http://www.w3schools.com/html/html_layout.asp
  *  - ...
  *  - ...
  *  - ...
@@ -171,16 +174,15 @@ echo "
 	    })
 	  }).extend([
 	    new ol.control.ScaleLine(),
-	    mousePositionControl,
-	    new ol.control.ZoomToExtent({
-	      extent: ol.proj.fromLonLat([14.4386, 41.1540, 14.7258,  41.3020])
-/*	      [  813079.7791264898, 5929220.284081122,
-	        848966.9639063801, 5936863.986909639
-	      ]*/
-	    })
+	    mousePositionControl
 	  ])
         });
 	map.addLayer(Lvec);
+	//map.addControl(mousePositionControl);
+	map.addControl( new ol.control.ZoomToExtent({
+          extent: ol.proj.fromLonLat([14.4386, 41.1540, 14.7258,  41.3020])
+        }) );
+	//map.addControl(new ol.control.ZoomSlider());
 
 	// Create the graticule component
 	var graticule = new ol.Graticule({
@@ -191,7 +193,7 @@ echo "
 	    lineDash: [0.5, 4]
 	  })
 	});
-	graticule.setMap(map);
+	//graticule.setMap(map);
 
 	var typeSelect = document.getElementById('type');
 	var draw; // global so we can remove it later
