@@ -1,0 +1,17 @@
+CREATE DATABASE IF NOT EXISTS waspmote_net;
+DROP TABLE IF EXISTS waspmote_net.measurements;
+CREATE TABLE waspmote_net.measurements (
+	id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+	created TIMESTAMP DEFAULT NOW(),
+	cur_timestamp TIMESTAMP,
+	node_id CHAR(9) NOT NULL,
+	date DATE NOT NULL,
+	time TIME NOT NULL,
+	B INT(2) ZEROFILL,
+	T DECIMAL(5,2),
+	R DECIMAL(5,2),
+	RH DECIMAL(5,2),
+	LW INT(2),
+	WD CHAR(3),
+	WS DECIMAL(5,2)
+)
