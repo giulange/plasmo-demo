@@ -38,8 +38,8 @@
 
     /* Your Database User Name and Passowrd */
     $server = 'localhost';
-    $username = 'root';
-    $password = 'pedology-life-2014';
+    $username = 'wwwdata';
+    $password = 'mywappsql';
 
     try {
       /* Establish the database connection */

@@ -56,8 +56,8 @@
 
   echo " .2. Connecting to MySQL db...";
   $servername     = "localhost";
-  $username       = "root";
-  $password       = "pedology-life-2014";
+  $username       = "wwwdata";
+  $password       = "mywappsql";
   $dbname         = "waspmote_net";
   $tblname        = "measurements";
 
