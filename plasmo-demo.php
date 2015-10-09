@@ -1,5 +1,4 @@
 <?php
-
 /*
  * Usefull Links:
  *  - Draw a box, coordinate conversion (**) --> http://harrywood.co.uk/maps/examples/openlayers/bbox-selector.html
@@ -13,7 +12,6 @@
  *  - ...
  *  - ...
  */
-
 echo "<HTML lang=\"en\">";
 echo "  <head>";
 echo "   <title>Plasmo webapp</title>";
@@ -23,57 +21,72 @@ echo "    <link rel=\"stylesheet\" href=\"https://maxcdn.bootstrapcdn.com/bootst
 echo "    <script src=\"https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js\"></script>";
 echo "    <link rel=\"stylesheet\" href=\"https://cdnjs.cloudflare.com/ajax/libs/ol3/3.5.0/ol.css\" type=\"text/css\">";
 echo "    <script src=\"https://cdnjs.cloudflare.com/ajax/libs/ol3/3.5.0/ol.js\"></script>";
-
 echo "    <style>
-           #map {
-            background-color:black;
-            height:  256px;
-            width:   512px;
-            padding: 1px;
-           }
-           .ol-attribution a{
-             color: black;
-           }
-	   #selectors{
-            line-height:0px;
-            background-color:white;
-            height:236px;
-            width:350;
-            float:left;
-            padding:20px;
-	   }
-           #sim {
-            line-height:0px;
-            background-color:white;
-            height:256px;
-            width:500;
-            float:left;
-            padding:7px;
-           }
-           #plot {
-            line-height:0px;
-            background-color:white;
-            height:256px;
-            width:500;
-            float:left;
-            padding:7px;
-           }
-
-           hr{ 
-            display: block;
-            margin-top:   1.5em;
-            margin-bottom:0.5em;
-            margin-left:  auto;
-            margin-right: auto;
-            border-style: inset;
-            border-width: 2px;
-	}
+						#map {
+							position:static;
+							margin-left:10px;
+							margin-top:10px;
+            	background-color:black;
+            	height:  256px;
+            	width:   512px;
+            	padding: 1px;
+           	}
+           	.ol-attribution a{
+            	color: black;
+           	}
+   					#selectors{
+           		position:absolute;
+           		left:530px;
+           		top:50px;
+	            line-height:0px;
+	            background-color:white;
+	            height:100px;
+	            width:320px;
+	            float:left;
+	            padding:20px;
+				  	}
+				  	#mouse-position{
+           		position:absolute;
+           		left:412px;
+           		top:328px;
+	            line-height:0px;
+	            background-color:white;
+	            height:20px;
+	            width:120px;
+	            float:left;
+	            padding:0px;
+			  		}
+          	#sim {
+	            line-height:0px;
+	            background-color:white;
+	            height:226px;
+	            width:505px;
+	            float:left;
+	            padding:7px;
+	          }
+  	        #plot {
+	            line-height:0px;
+	            background-color:white;
+	            height:210px;
+	            width:505px;
+	            float:left;
+	            padding:7px;
+	          }
+  	        hr{ 
+	            display: block;
+	            margin-top:   0.2em;
+	            margin-bottom:0.8em;
+	            margin-left:  auto;
+	            margin-right: auto;
+	            border-style: inset;
+	            border-width: 1px;
+	            width:505;
+						}
  	</style>";
 echo "  </head>";
 echo "
  <body>
-    <h1>Prototype Plasmo Wapp</h1>
-
+    <h2>Prototype Plasmo Wapp</h2>
     <div id=\"map\" class=\"map\"></div>
     <div id=\"selectors\" class=\"selectors\">
      <form class=\"form-inline\">
@@ -97,189 +110,184 @@ echo "
        </select>
      </form>
     </div>
-    <div class=\"span6\" id=\"mouse-position\">&nbsp;</div>
+    <div class=\"mouse-position\" id=\"mouse-position\">&nbsp;</div>
     <!-- the result of the php will be rendered inside these divs -->
+    <h3><BR>Plots:</h3>
     <div id=\"sim\" class=\"sim\"></div>
     <div id=\"plot\" class=\"plot\"></div>
-
     <script type=\"text/javascript\">
 
-	var Lsat = new ol.layer.Tile({
-  	  source: new ol.source.MapQuest({layer: 'sat'})
-	});
-	var Lbing_styles = [
-	  'Road',
-	  'Aerial',
-	  'AerialWithLabels',
-	  'collinsBart',
-	  'ordnanceSurvey'
-	];
+    	// ***BACKGROUND MAP***
+			var Lsat = new ol.layer.Tile({
+		  	  source: new ol.source.MapQuest({layer: 'sat'})
+			});
+			var Lbing_styles = [
+			  'Road',
+			  'Aerial',
+			  'AerialWithLabels',
+			  'collinsBart',
+			  'ordnanceSurvey'
+			];
+			var Lbing = [];
+			var i, ii;
+			for (i = 0, ii = Lbing_styles.length; i < ii; ++i) {
+			  Lbing.push(new ol.layer.Tile({
+			    visible: false,
+			    preload: Infinity,
+			    source: new ol.source.BingMaps({
+			      key: 'Ak-dzM4wZjSqTlzveKz5u0d4IQ4bRzVI309GxmkgSVr1ewS6iPSrOvOKhA-CJlm3',
+			      imagerySet: Lbing_styles[i]
+			      // use maxZoom 19 to see stretched tiles instead of the BingMaps
+			      // \"no photos at this zoom level\" tiles
+			      // maxZoom: 19
+			    })
+			  }));
+			}
+			var Vsource = new ol.source.Vector({wrapX: false});
+			var Lvec = new ol.layer.Vector({
+			  source: Vsource,
+			  style: new ol.style.Style({
+			    fill: new ol.style.Fill({
+			      color: 'rgba(255, 255, 255, 0.2)'
+			    }),
+			    stroke: new ol.style.Stroke({
+			      color: '#ffcc33',
+			      width: 2
+			    }),
+			    image: new ol.style.Circle({
+			      radius: 7,
+			      fill: new ol.style.Fill({
+			        color: '#ffcc33'
+			      })
+			    })
+			  })
+			});
 
-	var Lbing = [];
-	var i, ii;
-	for (i = 0, ii = Lbing_styles.length; i < ii; ++i) {
-	  Lbing.push(new ol.layer.Tile({
-	    visible: false,
-	    preload: Infinity,
-	    source: new ol.source.BingMaps({
-	      key: 'Ak-dzM4wZjSqTlzveKz5u0d4IQ4bRzVI309GxmkgSVr1ewS6iPSrOvOKhA-CJlm3',
-	      imagerySet: Lbing_styles[i]
-	      // use maxZoom 19 to see stretched tiles instead of the BingMaps
-	      // \"no photos at this zoom level\" tiles
-	      // maxZoom: 19
-	    })
-	  }));
-	}
-	var Vsource = new ol.source.Vector({wrapX: false});
-	var Lvec = new ol.layer.Vector({
-	  source: Vsource,
-	  style: new ol.style.Style({
-	    fill: new ol.style.Fill({
-	      color: 'rgba(255, 255, 255, 0.2)'
-	    }),
-	    stroke: new ol.style.Stroke({
-	      color: '#ffcc33',
-	      width: 2
-	    }),
-	    image: new ol.style.Circle({
-	      radius: 7,
-	      fill: new ol.style.Fill({
-	        color: '#ffcc33'
-	      })
-	    })
-	  })
-	});
-
-	var mousePositionControl = new ol.control.MousePosition({
-	  coordinateFormat: ol.coordinate.createStringXY(4),
-	  projection: 'EPSG:4326',
-	  // comment the following two lines to have the mouse position
-	  // be placed within the map.
-	  className: 'custom-mouse-position',
-	  target: document.getElementById('mouse-position'),
-	  undefinedHTML: '&nbsp;'
-	});
-
-        map = new ol.Map({
-          target: 'map',
-          layers: Lbing,
-          loadTilesWhileInteracting: true,
-          view: new ol.View({
-            center: ol.proj.fromLonLat([14.5, 41.20]),
-            zoom: 11
-          }),
-	  controls: ol.control.defaults({
-	    attributionOptions: /** @type {olx.control.AttributionOptions} */ ({
-	      collapsible: true 
-	    })
-	  }).extend([
-	    new ol.control.ScaleLine(),
-	    mousePositionControl
-	  ])
-        });
-	map.addLayer(Lvec);
-	//map.addControl(mousePositionControl);
-	map.addControl( new ol.control.ZoomToExtent({
-          extent: ol.proj.fromLonLat([14.4386, 41.1540, 14.7258,  41.3020])
-        }) );
-	//map.addControl(new ol.control.ZoomSlider());
-
-	// Create the graticule component
-	var graticule = new ol.Graticule({
-	  // the style to use for the lines, optional.
-	  strokeStyle: new ol.style.Stroke({
-	    color: 'rgba(255,120,0,0.9)',
-	    width: 2,
-	    lineDash: [0.5, 4]
-	  })
-	});
-	//graticule.setMap(map);
-
-	var typeSelect = document.getElementById('type');
-	var draw; // global so we can remove it later
-	function addInteraction() {
-	  var value = typeSelect.value;
-	  if (value !== 'None') {
-	    draw = new ol.interaction.Draw({
-	      source: Vsource,
-	      type: /** @type {ol.geom.GeometryType} */ (value)
-	    });
-	    map.addInteraction(draw);
-	  }
-	}
-	/**
-	 * Let user change the geometry type.
-	 * @param {Event} e Change event.
-	 */
-	typeSelect.onchange = function(e) {
-	  map.removeInteraction(draw);
-	  addInteraction();
-	};
-	addInteraction();
-
-	var select = document.getElementById('layer-select');
-	function onChange() {
-	  var style = select.value;
-	  for (var i = 0, ii = Lbing.length; i < ii; ++i) {
-	    Lbing[i].setVisible(Lbing_styles[i] === style);
-	  }
-	}
-	select.addEventListener('change', onChange);
-	onChange();
-
-	/**
-	* Add a click handler to the map to render the popup.
-	*/
-	map.on('singleclick', function(evt) {
-		
-		var coordinate = evt.coordinate;
-		var hdms = ol.proj.toLonLat(coordinate, 'EPSG:3857');
-		console.log(\"Coordinates [lon,lat] = \" +  hdms);
-		//console.log(\"Coordinates \"+coordinate);
-		//console.log(\"Coordinates [N,E]\" +  ol.coordinate.toStringHDMS(hdms));
-		var xy = ol.coordinate.toStringXY(ol.proj.transform(coordinate, new ol.proj.Projection('EPSG:3857'), new ol.proj.Projection('EPSG:32632')),6);
-		console.log(\"Coordinates \"+xy);
-
-		// retrieve time series:
-        
-		// launch simulation model:
-		// --Set current time of launch:
-		var d = new Date();
-		var tm = d.getTime();
-		// --Send the data using post:
-		// ----URL:
-		var url = window.location.pathname;
-		var myreq = \"LAT=\" + hdms[1] + \"&LON=\" + hdms[0] + \"&TIME=\" + tm;
-		var posting = $.post( url, myreq );
-		// Put the results in a div
-		posting.done( function( data ) {
-			ofile = \"./fig/sim_plasmo__\" + tm + \".png\";
-			climfile = \"./fig/CL__\" + tm + \".png\";
-			var img = document.createElement(\"img\");
-			img.src = ofile;
-			img.width  = 500;//1000;
-			img.height = 200;//400;
-			img.alt = \"Image not Found!\";
-			// **PLOT**
-			$(\"#sim\").append( \"<hr>\" );
-			//$(\"#sim\").append( \"Running the simulation model... <BR>\" );
-			//$(\"#sim\").append( \"Lat: \" + hdms[1] + \",   \" );
-			//$(\"#sim\").append( \"Lon: \" + hdms[0] + \"<BR>\" );
-			//$(\"#sim\").append( ofile + \"<BR>\" );
-			// This next line will just add it to the <body> tag
-			document.getElementById('sim').appendChild(img);
-			$(\"#plot\").append( \"<hr>\" );
-			var img2 = document.createElement(\"img\");
-			img2.src = climfile;
-			img2.width  = 500;//1000;
-			img2.height = 200;//1000;
-			img2.alt = \"Image not Found!\";
-			document.getElementById('plot').appendChild(img2);
-		});
-	});
-
+			// ***MOUSE COORDINATES***
+			var mousePositionControl = new ol.control.MousePosition({
+			  coordinateFormat: ol.coordinate.createStringXY(4),
+			  projection: 'EPSG:4326',
+			  // comment the following two lines to have the mouse position
+			  // be placed within the map.
+			  className: 'custom-mouse-position',
+			  target: document.getElementById('mouse-position'),
+			  undefinedHTML: '&nbsp;'
+			});
+      map = new ol.Map({
+        target: 'map',
+        layers: Lbing,
+        loadTilesWhileInteracting: true,
+        view: new ol.View({
+          center: ol.proj.fromLonLat([14.5, 41.20]),
+          zoom: 11
+        }),
+			  controls: ol.control.defaults({
+			    attributionOptions: /** @type {olx.control.AttributionOptions} */ ({
+			      collapsible: true 
+			    })
+			  }).extend([
+	    		new ol.control.ScaleLine(),
+	    		mousePositionControl
+	  		])
+      });
+			map.addLayer(Lvec);
+			//map.addControl(mousePositionControl);
+			map.addControl( new ol.control.ZoomToExtent({
+		          extent: ol.proj.fromLonLat([14.4386, 41.1540, 14.7258,  41.3020])
+      }) );
+			//map.addControl(new ol.control.ZoomSlider());
+			// Create the graticule component
+			var graticule = new ol.Graticule({
+		  	// the style to use for the lines, optional.
+		  	strokeStyle: new ol.style.Stroke({
+		    	color: 'rgba(255,120,0,0.9)',
+		    	width: 2,
+		    	lineDash: [0.5, 4]
+		  	})
+			});
+			//graticule.setMap(map);
+			var typeSelect = document.getElementById('type');
+			var draw; // global so we can remove it later
+			function addInteraction() {
+	  		var value = typeSelect.value;
+	  		if (value !== 'None') {
+	    		draw = new ol.interaction.Draw({
+	      		source: Vsource,
+	      		type: /** @type {ol.geom.GeometryType} */ (value)
+	    		});
+	    		map.addInteraction(draw);
+	  		}
+			}
+			/**
+			 * Let user change the geometry type.
+			 * @param {Event} e Change event.
+			 */
+			typeSelect.onchange = function(e) {
+			  map.removeInteraction(draw);
+			  addInteraction();
+			};
+			addInteraction();
+			var select = document.getElementById('layer-select');
+			function onChange() {
+			  var style = select.value;
+			  for (var i = 0, ii = Lbing.length; i < ii; ++i) {
+			    Lbing[i].setVisible(Lbing_styles[i] === style);
+			  }
+			}
+			select.addEventListener('change', onChange);
+			onChange();
+			/**
+			* Add a click handler to the map to render the popup.
+			*/
+			map.on('singleclick', function(evt) {
+				
+				var coordinate = evt.coordinate;
+				var hdms = ol.proj.toLonLat(coordinate, 'EPSG:3857');
+				console.log(\"Coordinates [lon,lat] = \" +  hdms);
+				//console.log(\"Coordinates \"+coordinate);
+				//console.log(\"Coordinates [N,E]\" +  ol.coordinate.toStringHDMS(hdms));
+				var xy = ol.coordinate.toStringXY(ol.proj.transform(coordinate, new ol.proj.Projection('EPSG:3857'), new ol.proj.Projection('EPSG:32632')),6);
+				console.log(\"Coordinates \"+xy);
+				// retrieve time series:
+			      
+				// launch simulation model:
+				// --Set current time of launch:
+				var d = new Date();
+				var tm = d.getTime();
+				// --Send the data using post:
+				// ----URL:
+				var url = window.location.pathname;
+				var myreq = \"LAT=\" + hdms[1] + \"&LON=\" + hdms[0] + \"&TIME=\" + tm;
+				var posting = $.post( url, myreq );
+				// Put the results in a div
+				posting.done( function( data ) {
+					ofile = \"./fig/sim_plasmo__\" + tm + \".png\";
+					climfile = \"./fig/CL__\" + tm + \".png\";
+					var img = document.createElement(\"img\");
+					img.src = ofile;
+					img.width  = 500;//1000;
+					img.height = 200;//400;
+					img.alt = \"Image not Found!\";
+					// **SIMULATION**
+					$(\"#sim\").append( \"<hr>\" );
+					//$(\"#sim\").append( \"Running the simulation model... <BR>\" );
+					//$(\"#sim\").append( \"Lat: \" + hdms[1] + \",   \" );
+					//$(\"#sim\").append( \"Lon: \" + hdms[0] + \"<BR>\" );
+					//$(\"#sim\").append( ofile + \"<BR>\" );
+					// This next line will just add it to the <body> tag
+					document.getElementById('sim').appendChild(img);
+					// **CLIME**
+					$(\"#plot\").append( \"<hr>\" );
+					var img2 = document.createElement(\"img\");
+					img2.src = climfile;
+					img2.width  = 500;//1000;
+					img2.height = 200;//1000;
+					img2.alt = \"Image not Found!\";
+					document.getElementById('plot').appendChild(img2);
+				});
+			});
     </script>
- </body>
+	</body>
 </HTML>";
 
 if($_SERVER["REQUEST_METHOD"]=="POST"){
@@ -300,7 +308,6 @@ if($_SERVER["REQUEST_METHOD"]=="POST"){
     foreach($retArray as $rx){
 			echo "$rx<br>";
     }
-
 	//if($retStatus){
   	$im = @imagecreatefrompng($ofile);
   	// See if it failed
@@ -319,9 +326,8 @@ if($_SERVER["REQUEST_METHOD"]=="POST"){
 	}
   /*
 	header('Content-Type: image/png');
-  imagepng($im);
+  	imagepng($im);
   //imagedestroy($im);
 	*/
 }
-
 ?>
